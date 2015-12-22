@@ -13,20 +13,25 @@ class DeleterBot
     @client = Slack::Web::Client.new
     @user = ENV["JASON"]
     @channel = ENV["CHANNEL"]
-    @excluded_sub_types = ['group_join', 'group_purpose', 'group_topic']
+    @excluded_sub_types = ['group_join', 'group_leave', 'group_purpose', 'group_topic', 'group_unarchive', 'group_archive', 'group_rename',
+                           'channel_join', 'channel_leave', 'channel_purpose', 'channel_topic', 'channel_unarchive', 'channel_archive', 'channel_rename']
   end
 
   def run
     puts "Starting deleter-bot for User: #{@user} on Channel: #{@channel}"
     messages = get_messages
     filtered_messages = filter_messages(messages)
-    puts "Got #{filtered_messages.count} of your messages. Are you sure you want to delete them? (y/n)"
-    if gets.chomp == 'y'
-      delete_messages(filtered_messages)
-      puts "Success!"
+    if filtered_messages.count == 0
+      puts "No messages to delete. Exiting."
     else
-      puts "Exiting without deleting messages."
-      exit
+      puts "Got #{filtered_messages.count} of your messages. Are you sure you want to delete them? (y/n)"
+      if gets.chomp == 'y'
+        delete_messages(filtered_messages)
+        puts "Success!"
+      else
+        puts "Exiting without deleting messages."
+        exit
+      end
     end
   end
 
@@ -44,7 +49,7 @@ class DeleterBot
 
   def filter_messages(messages)
     puts "Filtering messages..."
-    messages.select{|m| m["user"] == @user}
+    messages.select{|m| m["user"] == @user && !@excluded_sub_types.include?(m["subtype"])}
   end
 
   def delete_messages(filtered_messages)

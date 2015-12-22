@@ -13,7 +13,7 @@ class DeleterBot
     @client = Slack::Web::Client.new
     @user = ENV["JASON"]
     @channel = ENV["CHANNEL"]
-    @excluded_sub_types = ['group_join', 'group_purpose']
+    @excluded_sub_types = ['group_join', 'group_purpose', 'group_topic']
   end
 
   def run
